@@ -49,25 +49,28 @@ export default async function handler(req, res) {
 🍹 [NAZWA]
 
 📚 HISTORIA:
-[1-2 zdania o pochodzeniu]
+[2-3 zdania o pochodzeniu i ciekawostkach]
 
 🧪 SKŁADNIKI:
 - [nazwa] - [ilość]
 
 👨‍🍳 PRZYGOTOWANIE:
-[1-2 zdania instrukcji]
+[2-3 zdania szczegółowych instrukcji]
 
 🍸 SERWOWANIE:
-[1 zdanie o podaniu]
+[2 zdania o podaniu i dekoracji]
 
-Zwięźle, bez zbędnych słów.`
+💡 DODATKOWE INFORMACJE:
+[2 zdania z ciekawostkami, wariantami lub profesjonalnymi wskazówkami]
+
+Zwięźle ale kompletnie.`
           },
           {
             role: 'user',
             content: `Przepis na "${cocktailName}"`
           }
         ],
-        max_tokens: 400,
+        max_tokens: 550,
         temperature: 0,
         top_p: 0.8
       })
