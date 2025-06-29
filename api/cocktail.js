@@ -60,9 +60,6 @@ export default async function handler(req, res) {
 🍸 SERWOWANIE:
 [2 zdania o podaniu i dekoracji]
 
-💡 DODATKOWE INFORMACJE:
-[2 zdania z ciekawostkami, wariantami lub profesjonalnymi wskazówkami]
-
 Zwięźle ale kompletnie.`
           },
           {
@@ -70,7 +67,7 @@ Zwięźle ale kompletnie.`
             content: `Przepis na "${cocktailName}"`
           }
         ],
-        max_tokens: 550,
+        max_tokens: 450,
         temperature: 0,
         top_p: 0.8
       })
