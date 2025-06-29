@@ -21,27 +21,18 @@ export default async function handler(req, res) {
       cocktailName = req.body.cocktailName;
     }
   } catch (error) {
-    console.error('Parse error:', error);
     return res.status(400).json({ error: 'Parse error' });
   }
 
   if (!cocktailName) {
-    return res.status(400).json({ 
-      error: 'Brak cocktailName',
-      body: req.body,
-      type: typeof req.body
-    });
+    return res.status(400).json({ error: 'Brak nazwy koktajlu' });
   }
 
-  // Sprawdź czy klucz OpenAI istnieje
   if (!process.env.OPENAI_API_KEY) {
-    console.error('Brak OPENAI_API_KEY');
-    return res.status(500).json({ error: 'Konfiguracja serwera nieprawidłowa' });
+    return res.status(500).json({ error: 'Brak konfiguracji' });
   }
 
   try {
-    console.log(`Generuję przepis przez OpenAI: ${cocktailName}`);
-    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -53,65 +44,57 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: `Jesteś ekspertem barmana. Tworzysz szczegółowe przepisy na koktajle po polsku w formacie:
+            content: `Jesteś ekspertem barmana. Tworzysz szczegółowe przepisy na koktajle po polsku. Format:
 
 🍹 [NAZWA KOKTAJLU]
 
 📚 HISTORIA:
-[Szczegółowa historia koktajlu - pochodzenie, twórca, kontekst historyczny, ciekawostki]
+[Szczegółowa historia - pochodzenie, twórca, kontekst historyczny, ciekawostki, ewolucja receptury]
 
 🧪 SKŁADNIKI:
-- [składnik 1 z dokładną ilością]
-- [składnik 2 z dokładną ilością]
+- [składnik 1 z dokładną ilością i opisem]
+- [składnik 2 z dokładną ilością i opisem]
 - [wszystkie składniki z precyzyjnymi proporcjami]
 
 👨‍🍳 PRZYGOTOWANIE:
-[Szczegółowe instrukcje krok po kroku, techniki barmanskie]
+[Szczegółowe instrukcje krok po kroku, profesjonalne techniki barmanskie, timing, temperatura]
 
 🍸 SERWOWANIE:
-[Typ kieliszka, temperatura, dekoracje, sposób podania]
+[Dokładny opis kieliszka, temperatury, dekoracji, sposobu podania, prezentacji]
 
-Twórz autentyczne, profesjonalne przepisy z prawdziwymi proporcjami.`
+Pisz szczegółowo i profesjonalnie, minimum 4-5 zdań w każdej sekcji.`
           },
           {
             role: 'user',
-            content: `Stwórz szczegółowy przepis na koktajl "${cocktailName}"`
+            content: `Napisz szczegółowy przepis na koktajl "${cocktailName}"`
           }
         ],
-        max_tokens: 1000,
-        temperature: 0.3
+        max_tokens: 900,
+        temperature: 0.2,
+        top_p: 0.9,
+        frequency_penalty: 0,
+        presence_penalty: 0
       })
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API Error:', response.status, errorText);
-      return res.status(500).json({ 
-        error: 'Błąd generowania przepisu',
-        status: response.status
-      });
+      return res.status(500).json({ error: 'Błąd OpenAI' });
     }
 
     const data = await response.json();
     const recipe = data.choices?.[0]?.message?.content;
 
     if (recipe) {
-      console.log('Przepis wygenerowany pomyślnie');
       return res.status(200).json({
         name: cocktailName,
         content: recipe,
         emoji: '🍸'
       });
     } else {
-      console.error('Brak przepisu w odpowiedzi');
-      return res.status(500).json({ error: 'Nie udało się wygenerować przepisu' });
+      return res.status(500).json({ error: 'Brak przepisu' });
     }
 
   } catch (error) {
-    console.error('Błąd API:', error.message);
-    return res.status(500).json({ 
-      error: 'Błąd wewnętrzny serwera',
-      message: error.message 
-    });
+    return res.status(500).json({ error: 'Błąd serwera' });
   }
 }
