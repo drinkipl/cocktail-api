@@ -44,23 +44,31 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: `Jesteś ekspertem barmana. Podaj tylko kluczowe informacje o koktajlu w formacie:
+            content: `Jesteś ekspertem barmana. Podaj informacje o koktajlu w formacie:
+
 🍹 [NAZWA]
+
+📚 HISTORIA:
+[Pochodzenie i ciekawostki - 2-3 zdania]
+
 🧪 SKŁADNIKI:
 - [składnik] - [ilość]
-👨‍🍳 PRZYGOTOWANIE:
-[Krótkie instrukcje 1-2 zdania]
-🍸 SERWOWANIE:
-[Kieliszek i dekoracja - 1 zdanie]
+- [składnik] - [ilość]
 
-Odpowiedz zwięźle i na temat.`
+👨‍🍳 PRZYGOTOWANIE:
+[Instrukcje krok po kroku - 2-3 zdania]
+
+🍸 SERWOWANIE:
+[Kieliszek i dekoracja - 1-2 zdania]
+
+Oddzielaj każdą sekcję pustą linią.`
           },
           {
             role: 'user',
             content: `Przepis na "${cocktailName}"`
           }
         ],
-        max_tokens: 300,
+        max_tokens: 500,
         temperature: 0.1,
         top_p: 0.8
       })
