@@ -40,36 +40,35 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo',
         messages: [
           {
             role: 'system',
-            content: `Jesteś ekspertem barmana. Podaj informacje o koktajlu w formacie:
+            content: `Ekspert barman. Format odpowiedzi:
 
 🍹 [NAZWA]
 
 📚 HISTORIA:
-[Pochodzenie i ciekawostki - 2-3 zdania]
+[1-2 zdania o pochodzeniu]
 
 🧪 SKŁADNIKI:
-- [składnik] - [ilość]
-- [składnik] - [ilość]
+- [nazwa] - [ilość]
 
 👨‍🍳 PRZYGOTOWANIE:
-[Instrukcje krok po kroku - 2-3 zdania]
+[1-2 zdania instrukcji]
 
 🍸 SERWOWANIE:
-[Kieliszek i dekoracja - 1-2 zdania]
+[1 zdanie o podaniu]
 
-Oddzielaj każdą sekcję pustą linią.`
+Zwięźle, bez zbędnych słów.`
           },
           {
             role: 'user',
             content: `Przepis na "${cocktailName}"`
           }
         ],
-        max_tokens: 500,
-        temperature: 0.1,
+        max_tokens: 400,
+        temperature: 0,
         top_p: 0.8
       })
     });
