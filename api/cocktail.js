@@ -1,6 +1,3 @@
-cd ~/cocktail-api
-
-cat > api/cocktail.js << 'EOF'
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -24,18 +21,27 @@ export default async function handler(req, res) {
       cocktailName = req.body.cocktailName;
     }
   } catch (error) {
+    console.error('Parse error:', error);
     return res.status(400).json({ error: 'Parse error' });
   }
 
   if (!cocktailName) {
-    return res.status(400).json({ error: 'Brak nazwy koktajlu' });
+    return res.status(400).json({ 
+      error: 'Brak cocktailName',
+      body: req.body,
+      type: typeof req.body
+    });
   }
 
+  // Sprawdź czy klucz OpenAI istnieje
   if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'Brak OPENAI_API_KEY' });
+    console.error('Brak OPENAI_API_KEY');
+    return res.status(500).json({ error: 'Konfiguracja serwera nieprawidłowa' });
   }
 
   try {
+    console.log(`Generuję przepis przez OpenAI: ${cocktailName}`);
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -47,62 +53,65 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: `Jesteś ekspertem barmana i pisarzem kulinarnym. Tworzysz bardzo szczegółowe, rozbudowane przepisy na koktajle po polsku. Pisz długo, profesjonalnie i bardzo dokładnie. Format:
+            content: `Jesteś ekspertem barmana. Tworzysz szczegółowe przepisy na koktajle po polsku w formacie:
 
 🍹 [NAZWA KOKTAJLU]
 
 📚 HISTORIA:
-[Bardzo szczegółowa historia - minimum 4-5 zdań o pochodzeniu, twórcy, kontekście historycznym, ewolucji receptury, ciekawostkach, popularności w różnych epokach, wpływie na kulturę barmanską]
+[Szczegółowa historia koktajlu - pochodzenie, twórca, kontekst historyczny, ciekawostki]
 
 🧪 SKŁADNIKI:
-- [każdy składnik z bardzo dokładną ilością, opisem jakości, pochodzenia]
-- [dodatkowe informacje o alternatywach, markach, temperaturze]
-- [szczegóły techniczne o każdym składniku]
+- [składnik 1 z dokładną ilością]
+- [składnik 2 z dokładną ilością]
+- [wszystkie składniki z precyzyjnymi proporcjami]
 
 👨‍🍳 PRZYGOTOWANIE:
-[Bardzo szczegółowe instrukcje krok po kroku - każdy ruch, technika, timing, temperatura, porządek czynności, profesjonalne wskazówki, sekrety barmanskie, jak unikać błędów]
+[Szczegółowe instrukcje krok po kroku, techniki barmanskie]
 
 🍸 SERWOWANIE:
-[Dokładny opis kieliszka, temperatury, dekoracji, sposobu podania, momentu spożycia, ewentualnych dodatków, prezentacji]
+[Typ kieliszka, temperatura, dekoracje, sposób podania]
 
-🎯 WSKAZÓWKI PROFESJONALNE:
-[Dodatkowe profesjonalne tipy, wariacje, częste błędy, jak rozpoznać jakość, historie związane z koktajlem]
-
-Pisz bardzo rozbudowanie - każda sekcja minimum 3-4 zdania. Bądź niezwykle szczegółowy i profesjonalny.`
+Twórz autentyczne, profesjonalne przepisy z prawdziwymi proporcjami.`
           },
           {
             role: 'user',
-            content: `Stwórz bardzo szczegółowy, rozbudowany, profesjonalny przepis na koktajl "${cocktailName}". Napisz długo i dokładnie o każdym aspekcie.`
+            content: `Stwórz szczegółowy przepis na koktajl "${cocktailName}"`
           }
         ],
-        max_tokens: 1500,
+        max_tokens: 1000,
         temperature: 0.3
       })
     });
 
     if (!response.ok) {
-      return res.status(500).json({ error: 'Błąd OpenAI' });
+      const errorText = await response.text();
+      console.error('OpenAI API Error:', response.status, errorText);
+      return res.status(500).json({ 
+        error: 'Błąd generowania przepisu',
+        status: response.status
+      });
     }
 
     const data = await response.json();
     const recipe = data.choices?.[0]?.message?.content;
 
     if (recipe) {
+      console.log('Przepis wygenerowany pomyślnie');
       return res.status(200).json({
         name: cocktailName,
         content: recipe,
         emoji: '🍸'
       });
     } else {
-      return res.status(500).json({ error: 'Brak przepisu' });
+      console.error('Brak przepisu w odpowiedzi');
+      return res.status(500).json({ error: 'Nie udało się wygenerować przepisu' });
     }
 
   } catch (error) {
-    return res.status(500).json({ error: 'Błąd serwera' });
+    console.error('Błąd API:', error.message);
+    return res.status(500).json({ 
+      error: 'Błąd wewnętrzny serwera',
+      message: error.message 
+    });
   }
 }
-EOF
-
-git add .
-git commit -m "Add ultra-detailed cocktail recipes with professional tips"
-git push
