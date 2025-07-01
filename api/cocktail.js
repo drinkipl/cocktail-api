@@ -62,7 +62,7 @@ Format odpowiedzi:
 🍹 [NAZWA KOKTAJLU]
 
 📚 HISTORIA:
-[3-4 zwięzłe zdania o pochodzeniu i kluczowych ciekawostkach historycznych, np. rok powstania, twórca, miejsce.]
+[4-5 zwięzłe zdania o pochodzeniu i kluczowych ciekawostkach historycznych, np. rok powstania, twórca, miejsce.]
 
 🧪 SKŁADNIKI:
 - [Nazwa składnika 1] - [ilość i jednostka]
