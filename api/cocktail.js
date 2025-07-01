@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         // Zmieniono model na gpt-4o dla większej dokładności
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
